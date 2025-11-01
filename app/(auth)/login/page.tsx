@@ -24,10 +24,13 @@ export default function LoginPage() {
     try {
       await login(email, password)
       toast.success('Inicio de sesión exitoso')
-      router.push('/dashboard')
+
+      // Forzar redirección con window.location para asegurar que el middleware se ejecute
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 500)
     } catch (error) {
       toast.error('Credenciales inválidas')
-    } finally {
       setLoading(false)
     }
   }

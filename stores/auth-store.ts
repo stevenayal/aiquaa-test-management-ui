@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { User } from '@/types'
 
 interface AuthState {
@@ -9,6 +9,16 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   logout: () => void
   setUser: (user: User) => void
+}
+
+// Helper para manejar cookies
+const setCookie = (name: string, value: string, days = 7) => {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`
+}
+
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
 }
 
 // Simulación de autenticación
@@ -33,7 +43,7 @@ const mockLogin = async (email: string, password: string): Promise<{ user: User;
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -41,10 +51,21 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         const { user, token } = await mockLogin(email, password)
         set({ user, token, isAuthenticated: true })
+
+        // Sincronizar con cookies para el middleware
+        if (typeof window !== 'undefined') {
+          const authData = JSON.stringify({ state: { user, token, isAuthenticated: true } })
+          setCookie('auth-storage', authData, 7)
+        }
       },
 
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false })
+
+        // Limpiar cookie
+        if (typeof window !== 'undefined') {
+          deleteCookie('auth-storage')
+        }
       },
 
       setUser: (user: User) => {
@@ -53,6 +74,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 )
