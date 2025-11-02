@@ -72,6 +72,25 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </Button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">O</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push('/registro')}
+            >
+              Crear cuenta nueva
+            </Button>
+
             <div className="mt-4 text-center text-sm text-muted-foreground">
               <p>Credenciales de prueba:</p>
               <p className="font-mono">admin@aiquaa.com / Admin123!</p>

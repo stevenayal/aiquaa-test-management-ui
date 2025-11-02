@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Rutas públicas
-  const publicPaths = ['/login']
+  const publicPaths = ['/login', '/registro', '/verificar-otp']
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path))
 
   // Obtener token de las cookies o headers (simulado)
