@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api'
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://aiquaa-test-management-api-production.up.railway.app/api'
 
 export const AIQUAA_REQ_LINT_URL =
   process.env.NEXT_PUBLIC_AIQUAA_REQ_LINT_URL || 'http://localhost:8000/labs/req-lint'
