@@ -1,14 +1,17 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { User } from '@/types'
+import { API_BASE_URL } from '@/lib/constants'
 
 interface AuthState {
   user: User | null
   token: string | null
+  refreshToken: string | null
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
   setUser: (user: User) => void
+  setTokens: (accessToken: string, refreshToken: string) => void
 }
 
 // Helper para manejar cookies
@@ -21,24 +24,37 @@ const deleteCookie = (name: string) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
 }
 
-// Simulación de autenticación
-const mockLogin = async (email: string, password: string): Promise<{ user: User; token: string }> => {
-  // Simular delay de red
-  await new Promise((resolve) => setTimeout(resolve, 500))
+// Autenticación real con la API
+const apiLogin = async (
+  email: string,
+  password: string
+): Promise<{ user: User; accessToken: string; refreshToken: string }> => {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  })
 
-  if (email === 'admin@aiquaa.com' && password === 'admin123') {
-    return {
-      user: {
-        id: '1',
-        name: 'Admin AIQUAA',
-        email: 'admin@aiquaa.com',
-        role: 'Admin',
-      },
-      token: 'mock-jwt-token-' + Date.now(),
-    }
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Login failed' }))
+    throw new Error(error.message || 'Credenciales inválidas')
   }
 
-  throw new Error('Credenciales inválidas')
+  const data = await response.json()
+
+  // Mapear la respuesta de la API al formato del User
+  return {
+    user: {
+      id: data.user.id,
+      name: data.user.email.split('@')[0], // Usar email como nombre por ahora
+      email: data.user.email,
+      role: data.user.role === 'admin' ? 'Admin' : data.user.role === 'qa_lead' ? 'Tester' : 'Viewer',
+    },
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+  }
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -46,30 +62,47 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
 
       login: async (email: string, password: string) => {
-        const { user, token } = await mockLogin(email, password)
-        set({ user, token, isAuthenticated: true })
+        const { user, accessToken, refreshToken } = await apiLogin(email, password)
+        set({ user, token: accessToken, refreshToken, isAuthenticated: true })
 
         // Sincronizar con cookies para el middleware
         if (typeof window !== 'undefined') {
-          const authData = JSON.stringify({ state: { user, token, isAuthenticated: true } })
+          const authData = JSON.stringify({
+            state: { user, token: accessToken, refreshToken, isAuthenticated: true },
+          })
           setCookie('auth-storage', authData, 7)
         }
       },
 
       logout: () => {
-        set({ user: null, token: null, isAuthenticated: false })
+        set({ user: null, token: null, refreshToken: null, isAuthenticated: false })
 
         // Limpiar cookie
         if (typeof window !== 'undefined') {
           deleteCookie('auth-storage')
+          localStorage.removeItem('auth-storage')
         }
       },
 
       setUser: (user: User) => {
         set({ user })
+      },
+
+      setTokens: (accessToken: string, refreshToken: string) => {
+        set({ token: accessToken, refreshToken })
+
+        // Actualizar cookies
+        if (typeof window !== 'undefined') {
+          const { user, isAuthenticated } = get()
+          const authData = JSON.stringify({
+            state: { user, token: accessToken, refreshToken, isAuthenticated },
+          })
+          setCookie('auth-storage', authData, 7)
+        }
       },
     }),
     {

@@ -74,7 +74,7 @@ export default function LoginPage() {
             </Button>
             <div className="mt-4 text-center text-sm text-muted-foreground">
               <p>Credenciales de prueba:</p>
-              <p className="font-mono">admin@aiquaa.com / admin123</p>
+              <p className="font-mono">admin@aiquaa.com / Admin123!</p>
             </div>
           </form>
         </CardContent>

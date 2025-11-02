@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Filter } from 'lucide-react'
+import { Plus, Search, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -12,75 +12,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-const mockCases = [
-  {
-    id: '1',
-    key: 'TC-001',
-    title: 'Verificar inicio de sesión con credenciales válidas',
-    priority: 'Alta',
-    status: 'Listo',
-    type: 'Funcional',
-    lastRun: '2024-11-01',
-    result: 'Pasó',
-  },
-  {
-    id: '2',
-    key: 'TC-002',
-    title: 'Validar carrito de compras con múltiples productos',
-    priority: 'Crítica',
-    status: 'Listo',
-    type: 'E2E',
-    lastRun: '2024-11-01',
-    result: 'Pasó',
-  },
-  {
-    id: '3',
-    key: 'TC-003',
-    title: 'Verificar procesamiento de pago con tarjeta',
-    priority: 'Crítica',
-    status: 'Listo',
-    type: 'Integración',
-    lastRun: '2024-10-31',
-    result: 'Falló',
-  },
-  {
-    id: '4',
-    key: 'TC-004',
-    title: 'Probar búsqueda de productos por categoría',
-    priority: 'Media',
-    status: 'Listo',
-    type: 'Funcional',
-    lastRun: '2024-10-31',
-    result: 'Pasó',
-  },
-  {
-    id: '5',
-    key: 'TC-005',
-    title: 'Validar recuperación de contraseña',
-    priority: 'Alta',
-    status: 'Borrador',
-    type: 'Funcional',
-    lastRun: null,
-    result: null,
-  },
-]
+import { useTestCases } from '@/hooks/use-test-cases'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function CasosPage() {
   const [search, setSearch] = useState('')
-  const [priorityFilter, setPriorityFilter] = useState<string>('')
-  const [statusFilter, setStatusFilter] = useState<string>('')
+  const [priorityFilter, setPriorityFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  let filteredCases = mockCases.filter((caso) =>
+  const { data: cases, isLoading, error } = useTestCases()
+
+  let filteredCases = cases?.filter((caso) =>
     caso.title.toLowerCase().includes(search.toLowerCase())
   )
 
-  if (priorityFilter) {
-    filteredCases = filteredCases.filter((caso) => caso.priority === priorityFilter)
+  if (priorityFilter && priorityFilter !== 'all') {
+    filteredCases = filteredCases?.filter((caso) => caso.priority === priorityFilter)
   }
 
-  if (statusFilter) {
-    filteredCases = filteredCases.filter((caso) => caso.status === statusFilter)
+  if (statusFilter && statusFilter !== 'all') {
+    filteredCases = filteredCases?.filter((caso) => caso.status === statusFilter)
   }
 
   return (
@@ -131,74 +82,86 @@ export default function CasosPage() {
         </Select>
       </div>
 
-      <div className="rounded-lg border">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium">ID</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Título</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Prioridad</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Estado</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Tipo</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Último Resultado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCases.map((caso) => (
-                <tr key={caso.id} className="border-b hover:bg-muted/50 cursor-pointer">
-                  <td className="px-4 py-3 text-sm font-mono">{caso.key}</td>
-                  <td className="px-4 py-3 text-sm">{caso.title}</td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      className={
-                        caso.priority === 'Crítica'
-                          ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                          : caso.priority === 'Alta'
-                            ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
-                            : caso.priority === 'Media'
-                              ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                              : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                      }
-                    >
-                      {caso.priority}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      className={
-                        caso.status === 'Listo'
-                          ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                          : caso.status === 'Borrador'
-                            ? 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                            : 'bg-red-500/10 text-red-400 border-red-500/20'
-                      }
-                    >
-                      {caso.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm">{caso.type}</td>
-                  <td className="px-4 py-3">
-                    {caso.result ? (
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
+      {error && (
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle>Error al cargar casos de prueba</CardTitle>
+            <CardDescription>{(error as Error).message}</CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {!isLoading && !error && filteredCases && filteredCases.length === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>No hay casos de prueba</CardTitle>
+            <CardDescription>
+              Crea tu primer caso de prueba para comenzar a organizar las pruebas
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {!isLoading && !error && filteredCases && filteredCases.length > 0 && (
+        <div className="rounded-lg border">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b bg-muted/50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium">ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Título</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Prioridad</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Estado</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Tipo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCases.map((caso) => (
+                  <tr key={caso.id} className="cursor-pointer border-b hover:bg-muted/50">
+                    <td className="px-4 py-3 font-mono text-sm">{caso.key}</td>
+                    <td className="px-4 py-3 text-sm">{caso.title}</td>
+                    <td className="px-4 py-3">
                       <Badge
                         className={
-                          caso.result === 'Pasó'
-                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                            : 'bg-red-500/10 text-red-400 border-red-500/20'
+                          caso.priority === 'Crítica'
+                            ? 'border-red-500/20 bg-red-500/10 text-red-400'
+                            : caso.priority === 'Alta'
+                              ? 'border-orange-500/20 bg-orange-500/10 text-orange-400'
+                              : caso.priority === 'Media'
+                                ? 'border-yellow-500/20 bg-yellow-500/10 text-yellow-400'
+                                : 'border-blue-500/20 bg-blue-500/10 text-blue-400'
                         }
                       >
-                        {caso.result}
+                        {caso.priority}
                       </Badge>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">No ejecutado</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge
+                        className={
+                          caso.status === 'Listo'
+                            ? 'border-green-500/20 bg-green-500/10 text-green-400'
+                            : caso.status === 'Borrador'
+                              ? 'border-gray-500/20 bg-gray-500/10 text-gray-400'
+                              : 'border-red-500/20 bg-red-500/10 text-red-400'
+                        }
+                      >
+                        {caso.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm">{caso.type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
