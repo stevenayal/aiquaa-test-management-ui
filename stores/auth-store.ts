@@ -24,6 +24,30 @@ const deleteCookie = (name: string) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
 }
 
+// Login mock para credenciales de prueba
+const mockLogin = async (
+  email: string,
+  password: string
+): Promise<{ user: User; accessToken: string; refreshToken: string }> => {
+  // Simular delay de red
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  if (email === 'admin@aiquaa.com' && password === 'Admin123!') {
+    return {
+      user: {
+        id: 'mock-user-1',
+        name: 'Admin AIQUAA',
+        email: 'admin@aiquaa.com',
+        role: 'Admin',
+      },
+      accessToken: 'mock-jwt-token-' + Date.now(),
+      refreshToken: 'mock-refresh-token-' + Date.now(),
+    }
+  }
+
+  throw new Error('Credenciales inválidas')
+}
+
 // Autenticación real con la API
 const apiLogin = async (
   email: string,
