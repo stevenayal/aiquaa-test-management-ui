@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Plus, Search, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ import { useDefects } from '@/hooks/use-defects'
 import { DefectFormDialog } from '@/components/defects/defect-form-dialog'
 import { DefectCard } from '@/components/defects/defect-card'
 
-export default function DefectosPage() {
+function DefectosContent() {
   const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
   const [severityFilter, setSeverityFilter] = useState<string>('all')
@@ -138,5 +138,19 @@ export default function DefectosPage() {
       {/* Dialog para crear defecto */}
       <DefectFormDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
     </div>
+  )
+}
+
+export default function DefectosPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <DefectosContent />
+    </Suspense>
   )
 }
