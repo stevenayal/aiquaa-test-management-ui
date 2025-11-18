@@ -32,7 +32,7 @@ const mockLogin = async (
   // Simular delay de red
   await new Promise((resolve) => setTimeout(resolve, 500))
 
-  if (email === 'admin@aiquaa.com' && password === 'Admin123!') {
+  if (email === 'admin@aiquaa.com' && password === 'Admin123') {
     return {
       user: {
         id: 'mock-user-1',

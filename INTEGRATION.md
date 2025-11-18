@@ -21,7 +21,7 @@ https://aiquaa-test-management-api-production.up.railway.app/api/docs
 ### Credenciales de Prueba
 ```
 Email: admin@aiquaa.com
-Password: Admin123!
+Password: Admin123
 ```
 
 ### Flujo Implementado
@@ -197,7 +197,7 @@ Para probar la integración:
 
 1. **Login**
    - Ir a https://aiquaa-test-management-ui.vercel.app/login
-   - Usar: `admin@aiquaa.com` / `Admin123!`
+   - Usar: `admin@aiquaa.com` / `Admin123`
    - Verificar redirección a dashboard
 
 2. **Proyectos**
