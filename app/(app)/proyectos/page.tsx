@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { Plus, Search, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useProjects } from '@/hooks/use-projects'
+import { ProjectFormDialog } from '@/components/projects/project-form-dialog'
+import { ProjectCard } from '@/components/projects/project-card'
 
 export default function ProyectosPage() {
   const [search, setSearch] = useState('')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { data: projects, isLoading, error } = useProjects()
 
   const filteredProjects = projects?.filter((project) =>
@@ -23,7 +25,7 @@ export default function ProyectosPage() {
           <h1 className="text-3xl font-bold">Proyectos</h1>
           <p className="text-muted-foreground">Gestiona tus proyectos de testing</p>
         </div>
-        <Button>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nuevo Proyecto
         </Button>
@@ -61,7 +63,9 @@ export default function ProyectosPage() {
           <CardHeader>
             <CardTitle>No hay proyectos</CardTitle>
             <CardDescription>
-              Crea tu primer proyecto para comenzar a gestionar casos de prueba
+              {search
+                ? 'No se encontraron proyectos con ese término de búsqueda'
+                : 'Crea tu primer proyecto para comenzar a gestionar casos de prueba'}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -69,42 +73,12 @@ export default function ProyectosPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredProjects?.map((project) => (
-          <Card key={project.id} className="cursor-pointer transition-colors hover:border-primary">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Badge variant="outline">{project.key}</Badge>
-                <Badge
-                  className={
-                    project.status === 'Activo'
-                      ? 'border-green-500/20 bg-green-500/10 text-green-400'
-                      : 'border-gray-500/20 bg-gray-500/10 text-gray-400'
-                  }
-                >
-                  {project.status}
-                </Badge>
-              </div>
-              <CardTitle className="mt-2">{project.name}</CardTitle>
-              <CardDescription>{project.description || 'Sin descripción'}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="text-2xl font-bold">
-                    {(project as any).totalCases || 0}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Casos</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">
-                    {(project as any).totalRuns || 0}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Ejecuciones</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
+
+      {/* Dialog para crear proyecto */}
+      <ProjectFormDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
     </div>
   )
 }
