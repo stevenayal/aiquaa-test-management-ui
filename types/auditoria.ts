@@ -112,7 +112,7 @@ export function canNavigateToEvent(event: AuditoriaEvento): boolean {
  */
 export function getEventNavigation(event: AuditoriaEvento): AuditEventNavigation {
   const canNavigate = canNavigateToEvent(event)
-  const route = canNavigate ? getAuditEventRoute(event) : undefined
+  const route = canNavigate ? (getAuditEventRoute(event) ?? undefined) : undefined
 
   return {
     event,
