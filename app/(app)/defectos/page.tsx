@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Plus, Search, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,10 +18,24 @@ import { DefectFormDialog } from '@/components/defects/defect-form-dialog'
 import { DefectCard } from '@/components/defects/defect-card'
 
 export default function DefectosPage() {
+  const searchParams = useSearchParams()
   const [search, setSearch] = useState('')
   const [severityFilter, setSeverityFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+
+  // Handle URL query parameters
+  useEffect(() => {
+    const statusParam = searchParams.get('status')
+    const severityParam = searchParams.get('severity')
+
+    if (statusParam) {
+      setStatusFilter(statusParam)
+    }
+    if (severityParam) {
+      setSeverityFilter(severityParam)
+    }
+  }, [searchParams])
 
   const { data: defects, isLoading, error } = useDefects()
 

@@ -68,3 +68,7 @@ export function calculatePercentage(value: number, total: number): number {
   if (total === 0) return 0
   return Math.round((value / total) * 100)
 }
+
+export function formatNumber(value: number): string {
+  return new Intl.NumberFormat('es-ES').format(value)
+}
