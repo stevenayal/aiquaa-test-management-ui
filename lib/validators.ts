@@ -210,22 +210,6 @@ export const runSchema = z.object({
   }),
 })
 
-// Defecto validators
-export const defectoSchema = z.object({
-  title: z.string().min(5, 'El título debe tener al menos 5 caracteres'),
-  description: z.string().min(10, 'La descripción debe tener al menos 10 caracteres'),
-  severity: z.enum(['Crítica', 'Alta', 'Media', 'Baja']),
-  priority: z.enum(['Crítica', 'Alta', 'Media', 'Baja']),
-  type: z.enum(['Bug', 'Defecto', 'Regresión', 'Mejora']),
-  reproducible: z.boolean(),
-  stepsToReproduce: z.array(z.string()).min(1, 'Debe incluir pasos para reproducir'),
-  actualBehavior: z.string().optional(),
-  expectedBehavior: z.string().optional(),
-  foundInEnvironment: z.string().optional(),
-  foundInBuild: z.string().optional(),
-  assignedTo: z.string().optional(),
-})
-
 // ============================================
 // RIESGOS
 // ============================================
