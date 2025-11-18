@@ -29,7 +29,7 @@ El sistema de registro con verificación OTP por email está **100% funcional** 
 │  [  Crear cuenta nueva  ] ← NUEVO  │
 │                                     │
 │  Credenciales de prueba:           │
-│  admin@aiquaa.com / Admin123!      │
+│  admin@aiquaa.com / Admin123       │
 └─────────────────────────────────────┘
 ```
 
