@@ -33,12 +33,12 @@ export default function ProfilePage() {
   } = useForm<UpdateProfileFormData>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      jobTitle: user?.jobTitle || '',
-      department: user?.department || '',
-      phone: user?.phone || '',
-      timezone: user?.timezone || 'America/Argentina/Buenos_Aires',
+      firstName: '',
+      lastName: '',
+      jobTitle: '',
+      department: '',
+      phone: '',
+      timezone: 'America/Argentina/Buenos_Aires',
     },
   })
 
