@@ -46,7 +46,11 @@ export function Topbar() {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/account')}>
+            <User className="mr-2 h-4 w-4" />
+            Mi Cuenta
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/profile')}>
             <User className="mr-2 h-4 w-4" />
             Perfil
           </DropdownMenuItem>

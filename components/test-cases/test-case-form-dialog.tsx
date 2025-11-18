@@ -199,8 +199,40 @@ export function TestCaseFormDialog({
     setValue('tags', newTags)
   }
 
+  // Verificar si hay proyectos disponibles
+  const hasProjects = projects && projects.length > 0
+
+  // Si no hay proyectos, mostrar mensaje en lugar del modal
+  if (open && !hasProjects && !isEditing) {
+    return (
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          handleClose()
+        }
+      }}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>No hay proyectos disponibles</DialogTitle>
+            <DialogDescription>
+              Debes crear un proyecto antes de crear casos de prueba.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleClose}>
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        handleClose()
+      }
+    }}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -237,11 +269,17 @@ export function TestCaseFormDialog({
                           <SelectValue placeholder="Selecciona un proyecto" />
                         </SelectTrigger>
                         <SelectContent>
-                          {projects?.map((project) => (
-                            <SelectItem key={project.id} value={project.id}>
-                              {project.name}
+                          {projects && projects.length > 0 ? (
+                            projects.map((project) => (
+                              <SelectItem key={project.id} value={project.id}>
+                                {project.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>
+                              No hay proyectos disponibles
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                     )}

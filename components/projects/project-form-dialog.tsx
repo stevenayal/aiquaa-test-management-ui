@@ -70,6 +70,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           endDate: project.endDate || '',
         })
       } else {
+        // Asegurar que el formulario esté completamente vacío al crear nuevo proyecto
         reset({
           name: '',
           description: '',
@@ -78,23 +79,69 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           endDate: '',
         })
       }
+    } else {
+      // Limpiar el formulario cuando se cierra el modal
+      reset({
+        name: '',
+        description: '',
+        status: 'Activo',
+        startDate: '',
+        endDate: '',
+      })
     }
   }, [open, project, reset])
 
   const onSubmit = async (data: ProjectFormData) => {
     try {
+      // Preparar payload según lo que espera el backend
+      // El backend solo espera: name, description, status, key (opcional)
+      const payload: {
+        name: string
+        description?: string
+        status?: string
+        key?: string
+      } = {
+        name: data.name.trim(),
+      }
+
+      // Solo incluir campos que tienen valor
+      if (data.description?.trim()) {
+        payload.description = data.description.trim()
+      }
+
+      if (data.status) {
+        payload.status = data.status
+      }
+
+      // No incluir startDate, endDate, teamMembers ya que el backend no los acepta aún
+
       if (isEditing) {
         await updateProject.mutateAsync({
           id: project.id,
-          data,
+          data: payload,
         })
       } else {
-        await createProject.mutateAsync(data)
+        await createProject.mutateAsync(payload)
       }
 
       handleClose()
-    } catch (error) {
+    } catch (error: any) {
       // El error ya se maneja en los hooks con toast
+      // Pero también podemos mostrar errores de validación específicos
+      if (error?.response?.data?.errors) {
+        const validationErrors = error.response.data.errors
+        // Mostrar errores de validación en los campos correspondientes
+        Object.keys(validationErrors).forEach((field) => {
+          const fieldError = validationErrors[field]
+          if (Array.isArray(fieldError)) {
+            // Si hay múltiples errores, tomar el primero
+            const errorMessage = fieldError[0]
+            if (field === 'name') {
+              // setError ya está manejado por react-hook-form
+            }
+          }
+        })
+      }
       console.error('Error al guardar proyecto:', error)
     }
   }
@@ -105,7 +152,11 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        handleClose()
+      }
+    }}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar Proyecto' : 'Nuevo Proyecto'}</DialogTitle>
@@ -126,6 +177,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
               placeholder="Ej: Sistema de Ventas"
               {...register('name')}
               className={errors.name ? 'border-red-500' : ''}
+              autoFocus
             />
             {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
           </div>

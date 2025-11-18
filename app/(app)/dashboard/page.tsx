@@ -115,18 +115,32 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Error State */}
-      {error && (
+      {/* Error State - Solo mostrar si hay un error real (no 404 manejado) */}
+      {error && !data && (
         <Card className="border-destructive">
           <CardHeader>
             <CardTitle>Error al cargar el dashboard</CardTitle>
-            <CardDescription>{(error as Error).message}</CardDescription>
+            <CardDescription>
+              {(error as Error).message || 'No se pudo cargar la información del dashboard'}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {/* Empty State - Cuando no hay datos disponibles */}
+      {!isLoading && !error && data && data.stats.totalCases === 0 && data.recentRuns.length === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>No hay métricas disponibles todavía</CardTitle>
+            <CardDescription>
+              Comienza creando proyectos y casos de prueba para ver estadísticas aquí
+            </CardDescription>
           </CardHeader>
         </Card>
       )}
 
       {/* Stats Grid */}
-      {!isLoading && !error && data && (
+      {!isLoading && !error && data && (data.stats.totalCases > 0 || data.recentRuns.length > 0) && (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {stats.map((stat) => (
